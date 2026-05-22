@@ -57,6 +57,7 @@ ChatServer::ChatServer(const ServerConfig& config){
     auto chatGPTConfig = std::make_shared<ai_chat_sdk::APIConfig>();
     chatGPTConfig->_modelName = "gpt-4o-mini";
     chatGPTConfig->_apiKey = config.chatGPTAPIKey;
+    chatGPTConfig->_endpoint = config.chatGPTEndpoint;
     chatGPTConfig->_temperature = config.temperature;
     chatGPTConfig->_maxTokens = config.maxTokens;
 

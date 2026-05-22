@@ -31,6 +31,7 @@ struct Config{
 // 通过API方式接入云端模型
 struct APIConfig : public Config{
     std::string _apiKey;          // API密钥
+    std::string _endpoint;        // 模型API endpoint base url
 };
 
 // 通过Ollama接入本地模型---不需要apikey

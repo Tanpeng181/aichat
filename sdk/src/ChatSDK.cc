@@ -127,6 +127,9 @@ bool ChatSDK::initAPIModelProviders(const std::string& modelName, const std::sha
     // 初始化模型
     std::map<std::string, std::string> modelParams;
     modelParams["api_key"] = apiConfig->_apiKey;
+    if(!apiConfig->_endpoint.empty()){
+        modelParams["endpoint"] = apiConfig->_endpoint;
+    }
     if(!_llmManager.initModel(modelName, modelParams)){
         ERR("ChatSDK::initAPIModelProviders: init model {} failed", modelName);
         return false;

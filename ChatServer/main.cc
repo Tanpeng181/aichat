@@ -129,10 +129,10 @@ bool validateConfig(ai_chat_server::ServerConfig& config) {
         return false;
     }
 
-    // 允许服务在没有模型凭据时启动，接口层会在没有可用模型时返回明确错误
-    if (config.deepseekAPIKey.empty() && config.chatGPTAPIKey.empty() && config.geminiAPIKey.empty() &&
-        config.ollamaModelName.empty()) {
-        WARN("未检测到任何API密钥或Ollama模型配置，服务器仍会启动，但暂时没有可用模型");
+    // 验证至少有一个API密钥不为空
+    if (config.deepseekAPIKey.empty() && config.chatGPTAPIKey.empty() && config.geminiAPIKey.empty()) {
+        ERR("错误: 至少需要提供一个有效的API密钥或Ollama模型配置");
+        return false;
     }
 
     // 验证Ollama配置参数
@@ -166,6 +166,7 @@ void showAPIInfo() {
     std::cout << "\n  # 设置环境变量后启动\n";
     std::cout << "  export DEEPSEEK_API_KEY=your_api_key\n";
     std::cout << "  export CHATGPT_API_KEY=your_api_key\n";
+    std::cout << "  export CHATGPT_ENDPOINT=https://api.openai.com\n";
     std::cout << "  export GEMINI_API_KEY=your_api_key\n";
     std::cout << "  ./AIChatServer\n";
     std::cout << "\n  兼容旧变量名: deepseek_apikey, chatgpt_apikey, gemini_apikey, gemini_apikey_new\n";
@@ -207,6 +208,7 @@ int main(int argc, char** argv) {
         config.deepseekAPIKey = getEnvVarAny({"DEEPSEEK_API_KEY", "deepseek_apikey"});
         config.chatGPTAPIKey = getEnvVarAny({"CHATGPT_API_KEY", "chatgpt_apikey"});
         config.geminiAPIKey = getEnvVarAny({"GEMINI_API_KEY", "gemini_apikey", "gemini_apikey_new"});
+        config.chatGPTEndpoint = getEnvVarAny({"CHATGPT_ENDPOINT", "OPENAI_BASE_URL", "OPENAI_API_BASE"});
         // 从命令行参数获取Ollama配置
         config.ollamaModelName = FLAGS_ollama_model_name;
         config.ollamaModelDesc = FLAGS_ollama_model_desc;
@@ -240,6 +242,7 @@ int main(int argc, char** argv) {
         INFO("  最大Token: {}", config.maxTokens);
         INFO("  DeepSeek API Key: {}", (config.deepseekAPIKey.empty() ? "未设置" : "已设置"));
         INFO("  ChatGPT API Key: {}", (config.chatGPTAPIKey.empty() ? "未设置" : "已设置"));
+        INFO("  ChatGPT 端点: {}", (config.chatGPTEndpoint.empty() ? "默认 https://api.openai.com" : config.chatGPTEndpoint));
         INFO("  Gemini API Key: {}", (config.geminiAPIKey.empty() ? "未设置" : "已设置"));
         INFO("  Ollama 模型: {}", (config.ollamaModelName.empty() ? "未设置" : config.ollamaModelName));
         INFO("  Ollama 模型描述: {}", (config.ollamaModelDesc.empty() ? "未设置" : config.ollamaModelDesc));
