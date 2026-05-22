@@ -1,0 +1,18 @@
+# 忽略构建文件夹
+/test/build/
+cmake-build-debug/
+build_check/
+.vscode
+
+# 忽略 CMake 生成的文件
+CMakeCache.txt
+CMakeFiles/
+Makefile
+*.cmake
+
+# 忽略临时文件
+*.o
+*.obj
+*.exe
+*.log
+*.tmp
