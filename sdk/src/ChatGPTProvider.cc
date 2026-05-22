@@ -1,6 +1,7 @@
 #include "../include/ChatGPTProvider.h"
 #include "../include/util/myLog.h"
 #include <cstdint>
+#include <cstdlib>
 #include <jsoncpp/json/json.h>
 #include "../../../cpp-httplib/httplib.h"
 #include <jsoncpp/json/reader.h>
@@ -9,6 +10,46 @@
 
 
 namespace ai_chat_sdk{
+
+namespace {
+
+void applyOptionalProxy(httplib::Client& client) {
+    const char* proxyValue = std::getenv("HTTPS_PROXY");
+    if (proxyValue == nullptr || proxyValue[0] == '\0') {
+        proxyValue = std::getenv("https_proxy");
+    }
+    if (proxyValue == nullptr || proxyValue[0] == '\0') {
+        proxyValue = std::getenv("HTTP_PROXY");
+    }
+    if (proxyValue == nullptr || proxyValue[0] == '\0') {
+        proxyValue = std::getenv("http_proxy");
+    }
+    if (proxyValue == nullptr || proxyValue[0] == '\0') {
+        return;
+    }
+
+    std::string proxy(proxyValue);
+    const std::string httpPrefix = "http://";
+    const std::string httpsPrefix = "https://";
+    if (proxy.rfind(httpPrefix, 0) == 0) {
+        proxy.erase(0, httpPrefix.size());
+    } else if (proxy.rfind(httpsPrefix, 0) == 0) {
+        proxy.erase(0, httpsPrefix.size());
+    }
+
+    const auto colonPos = proxy.rfind(':');
+    if (colonPos == std::string::npos || colonPos + 1 >= proxy.size()) {
+        WARN("skip proxy config because proxy value is invalid: {}", proxy);
+        return;
+    }
+
+    const std::string host = proxy.substr(0, colonPos);
+    const int port = std::stoi(proxy.substr(colonPos + 1));
+    client.set_proxy(host.c_str(), port);
+    INFO("ChatGPTProvider using proxy {}:{}", host, port);
+}
+
+} // namespace
 
 // 初始化模型
 bool ChatGPTProvider::initModel(const std::map<std::string, std::string>& modelConfig){
@@ -66,6 +107,8 @@ std::string ChatGPTProvider::sendMessage(const std::vector<Message>& messages,
     }
     if(requestParam.find("max_output_tokens") != requestParam.end()){
         maxOutputTokens = std::stoi(requestParam.at("max_output_tokens"));
+    } else if(requestParam.find("max_tokens") != requestParam.end()){
+        maxOutputTokens = std::stoi(requestParam.at("max_tokens"));
     }
 
         // 构建历史消息列表
@@ -92,7 +135,7 @@ std::string ChatGPTProvider::sendMessage(const std::vector<Message>& messages,
     httplib::Client client(_endpoint.c_str());
     client.set_connection_timeout(30, 0);
     client.set_read_timeout(60, 0);
-    client.set_proxy("127.0.0.1", 7890);
+    applyOptionalProxy(client);
 
         // 设置请求头参数
     httplib::Headers headers = {
@@ -159,6 +202,8 @@ std::string ChatGPTProvider::sendMessageStream(const std::vector<Message>& messa
     }
     if(requestParam.find("max_output_tokens") != requestParam.end()){
         maxOutputTokens = std::stoi(requestParam.at("max_output_tokens"));
+    } else if(requestParam.find("max_tokens") != requestParam.end()){
+        maxOutputTokens = std::stoi(requestParam.at("max_tokens"));
     }
 
         // 构建历史消息列表
@@ -187,7 +232,7 @@ std::string ChatGPTProvider::sendMessageStream(const std::vector<Message>& messa
     httplib::Client client(_endpoint.c_str());
     client.set_connection_timeout(60, 0);
     client.set_read_timeout(300, 0);
-    client.set_proxy("127.0.0.1", 7890);
+    applyOptionalProxy(client);
 
     // 设置请求头参数
     httplib::Headers headers = {

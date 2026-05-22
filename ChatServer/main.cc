@@ -129,10 +129,10 @@ bool validateConfig(ai_chat_server::ServerConfig& config) {
         return false;
     }
 
-    // 验证至少有一个API密钥不为空
-    if (config.deepseekAPIKey.empty() && config.chatGPTAPIKey.empty() && config.geminiAPIKey.empty()) {
-        ERR("错误: 至少需要提供一个有效的API密钥或Ollama模型配置");
-        return false;
+    // 允许服务在没有模型凭据时启动，接口层会在没有可用模型时返回明确错误
+    if (config.deepseekAPIKey.empty() && config.chatGPTAPIKey.empty() && config.geminiAPIKey.empty() &&
+        config.ollamaModelName.empty()) {
+        WARN("未检测到任何API密钥或Ollama模型配置，服务器仍会启动，但暂时没有可用模型");
     }
 
     // 验证Ollama配置参数

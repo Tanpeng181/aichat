@@ -3,6 +3,7 @@
 cmake-build-debug/
 build_check/
 .vscode
+**/.env
 
 # 忽略 CMake 生成的文件
 CMakeCache.txt
@@ -16,3 +17,4 @@ Makefile
 *.exe
 *.log
 *.tmp
+.env

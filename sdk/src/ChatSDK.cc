@@ -58,7 +58,7 @@ void ChatSDK::registerAllProvider(const std::vector<std::shared_ptr<Config>>& co
     for(const auto& config : configs){
         // config是不是OllamaConfig的一个对象呢
         auto ollamaConfig = std::dynamic_pointer_cast<OllamaConfig>(config);
-        if(ollamaConfig){
+        if(ollamaConfig && !ollamaConfig->_modelName.empty()){
             auto modelName = ollamaConfig->_modelName;
             if(modelNames.find(modelName) == modelNames.end()){
                 // 该模型还没有注册
@@ -78,6 +78,11 @@ void ChatSDK::registerAllProvider(const std::vector<std::shared_ptr<Config>>& co
 void ChatSDK::initProviders(const std::vector<std::shared_ptr<Config>>& configs){
     for(const auto& config : configs){
         if(auto apiConfig = std::dynamic_pointer_cast<APIConfig>(config)){
+            if(apiConfig->_apiKey.empty()){
+                INFO("skip init model {} because apiKey is empty", apiConfig->_modelName);
+                continue;
+            }
+
             if(apiConfig->_modelName == "deepseek-chat" || 
                apiConfig->_modelName == "gpt-4o-mini" ||
                apiConfig->_modelName == "gemini-2.0-flash"){
@@ -87,6 +92,11 @@ void ChatSDK::initProviders(const std::vector<std::shared_ptr<Config>>& configs)
                 ERR("Model {} is not supported", apiConfig->_modelName);
             }
         }else if(auto ollamaConfig = std::dynamic_pointer_cast<OllamaConfig>(config)){
+            if(ollamaConfig->_modelName.empty() || ollamaConfig->_endpoint.empty()){
+                INFO("skip init Ollama model because modelName or endpoint is empty");
+                continue;
+            }
+
             // 初始化Ollama模型提供者
             initOllamaModelProviders(ollamaConfig->_modelName, ollamaConfig);
         }else{
