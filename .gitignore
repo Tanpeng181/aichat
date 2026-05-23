@@ -5,6 +5,7 @@ build_check/
 .vscode
 **/.env
 /ChatServer/required/
+/ChatServer/build/www/
 
 # 忽略 CMake 生成的文件
 CMakeCache.txt

@@ -1,16 +1,107 @@
 #include "ChatServer.h"
 #include "../sdk/include/util/myLog.h"
 #include "../../cpp-httplib/httplib.h"
+#include <fstream>
 #include <jsoncpp/json/forwards.h>
 #include <jsoncpp/json/value.h>
 #include <jsoncpp/json/reader.h>
 #include <jsoncpp/json/writer.h>
+#include <limits.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 
 
 namespace ai_chat_server{
 
 namespace {
+
+std::string joinPath(const std::string& base, const std::string& child) {
+    if (base.empty()) {
+        return child;
+    }
+
+    if (base.back() == '/') {
+        return base + child;
+    }
+
+    return base + "/" + child;
+}
+
+bool directoryExists(const std::string& path) {
+    struct stat info {};
+    return stat(path.c_str(), &info) == 0 && S_ISDIR(info.st_mode);
+}
+
+bool fileExists(const std::string& path) {
+    struct stat info {};
+    return stat(path.c_str(), &info) == 0 && S_ISREG(info.st_mode);
+}
+
+std::string getCurrentWorkingDirectory() {
+    char buffer[PATH_MAX] = {0};
+    if (getcwd(buffer, sizeof(buffer)) == nullptr) {
+        return "";
+    }
+
+    return std::string(buffer);
+}
+
+std::string getExecutableDirectory() {
+    char buffer[PATH_MAX] = {0};
+    const ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+    if (length <= 0) {
+        return "";
+    }
+
+    buffer[length] = '\0';
+    std::string executablePath(buffer);
+    const auto lastSlash = executablePath.find_last_of('/');
+    if (lastSlash == std::string::npos) {
+        return "";
+    }
+
+    return executablePath.substr(0, lastSlash);
+}
+
+bool hasIndexHtml(const std::string& webRoot) {
+    return fileExists(joinPath(webRoot, "index.html"));
+}
+
+std::string findWebRoot() {
+    std::vector<std::string> candidates;
+
+    auto appendCandidates = [&candidates](const std::string& base) {
+        if (base.empty()) {
+            return;
+        }
+
+        candidates.push_back(joinPath(base, "www"));
+        candidates.push_back(joinPath(base, "build/www"));
+        candidates.push_back(joinPath(base, "../www"));
+        candidates.push_back(joinPath(base, "../build/www"));
+        candidates.push_back(joinPath(base, "../../build/www"));
+    };
+
+    appendCandidates(getCurrentWorkingDirectory());
+    appendCandidates(getExecutableDirectory());
+
+    const std::string executableDir = getExecutableDirectory();
+    if (!executableDir.empty()) {
+        const auto lastSlash = executableDir.find_last_of('/');
+        if (lastSlash != std::string::npos) {
+            appendCandidates(executableDir.substr(0, lastSlash));
+        }
+    }
+
+    for (const auto& candidate : candidates) {
+        if (directoryExists(candidate) && hasIndexHtml(candidate)) {
+            return candidate;
+        }
+    }
+
+    return "";
+}
 
 bool isModelInList(const std::vector<ai_chat_sdk::ModelInfo>& models, const std::string& modelName) {
     for (const auto& model : models) {
@@ -114,7 +205,13 @@ bool ChatServer::start(){
     // 前端页面相关的所有文件都放在www目录下  注意：将来前端页面名称命名为index.html
     // 当用户在浏览器中输入：http://ip:port/index.html    http://ip:port也能访问index.html页面
     // 在httplib中，默认情况下，如果请求路径中只有ip和端口，httplib默认会使用index.html文件
-    _chatServer->set_mount_point("/", "./www");
+    const std::string webRoot = findWebRoot();
+    if (!webRoot.empty()) {
+        INFO("static web root resolved to {}", webRoot);
+        _chatServer->set_mount_point("/", webRoot.c_str());
+    } else {
+        ERR("未找到前端静态目录，浏览器访问根路径将返回 404");
+    }
 
     // 为了不卡服务器云不卡主线程，服务器在单独的线程中运行
     std::thread serverThread([this](){
