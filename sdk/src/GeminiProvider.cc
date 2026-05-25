@@ -162,7 +162,7 @@ void applyOptionalProxy(httplib::Client& client) {
             // 6.检测响应是否成功
             if (response->status != 200)
             {
-                ERR("GeminiProvider::sendMessage: failed to send request, status: {}", response->status);
+                ERR("GeminiProvider::sendMessage: failed to send request, status: {}, body: {}", response->status, response->body);
                 return "";
             }
 

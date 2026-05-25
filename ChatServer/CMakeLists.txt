@@ -17,6 +17,8 @@ file(GLOB CHATSERVER_SOURCES CONFIGURE_DEPENDS
 
 add_executable(ChatServer ${CHATSERVER_SOURCES})
 
+target_compile_definitions(ChatServer PUBLIC CPPHTTPLIB_OPENSSL_SUPPORT)
+
 target_include_directories(ChatServer PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
 )

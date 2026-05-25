@@ -147,8 +147,8 @@ std::shared_ptr<Session> DataManager::getSession(const std::string& sessionId)co
 
     // 执行SQL语句
     rc = sqlite3_step(stmt);
-    if(rc != SQLITE_DONE){
-        ERR("getSession - 执行语句失败：{}", sqlite3_errmsg(_db));
+    if(rc != SQLITE_ROW){
+        WARN("getSession - 获取会话失败或不存在：{}", sessionId);
         sqlite3_finalize(stmt);
         return nullptr;
     }

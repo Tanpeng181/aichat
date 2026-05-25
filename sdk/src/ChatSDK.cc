@@ -278,7 +278,12 @@ std::string ChatSDK::sendMessage(const std::string& sessionId, const std::string
     requestParam["max_tokens"] = std::to_string(it->second->_maxTokens);
 
     // 调用LLMManager发送消息
-    auto response = _llmManager.sendMessage(session->_modelName, historyMessages, requestParam);
+    std::string response;
+    try {
+        response = _llmManager.sendMessage(session->_modelName, historyMessages, requestParam);
+    } catch(const std::exception& e) {
+        ERR("ChatSDK::sendMessage EXCEPTION: {}", e.what());
+    }
     if(response.empty()){
         ERR("ChatSDK::sendMessage: send message to model {} failed", session->_modelName);
         return "";

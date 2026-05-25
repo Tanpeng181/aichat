@@ -152,7 +152,7 @@ std::string ChatGPTProvider::sendMessage(const std::vector<Message>& messages,
 
     // 6. 检测响应是否成功
     if(response->status != 200){
-        ERR("ChatGPTProvider sendMessage POST request failed, status: {}", response->status);
+        ERR("ChatGPTProvider sendMessage POST request failed, status: {}, body: {}", response->status, response->body);
         return "";
     }
 

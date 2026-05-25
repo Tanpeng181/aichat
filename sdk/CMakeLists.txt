@@ -19,6 +19,8 @@ file(GLOB_RECURSE HDR CONFIGURE_DEPENDS
 #3. 生成静态库
 add_library(${SDK_NAME} STATIC ${SRC} ${HDR})
 
+target_compile_definitions(${SDK_NAME} PUBLIC CPPHTTPLIB_OPENSSL_SUPPORT)
+
 target_include_directories(${SDK_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

@@ -101,9 +101,9 @@ namespace ai_chat_sdk{
         };
 
         // 6. 发送POST请求
-        auto response = client.Post("/v1/chat/completions", headers, requestBodyStr, "application/json");
+        auto response = client.Post("/chat/completions", headers, requestBodyStr, "application/json");
         if(!response){
-            ERR("DeepSeekProvider sendMessage POST request failed");
+            ERR("DeepSeekProvider sendMessage POST request failed, error: {}", to_string(response.error()));
             return "";
         }
         INFO("DeepSeekProvider sendMessage POST request success, status : {}", response->status);
@@ -111,6 +111,7 @@ namespace ai_chat_sdk{
 
         // 检测响应是否成功
         if(response->status != 200){
+            ERR("DeepSeekProvider sendMessage POST request failed, status: {}, body: {}", response->status, response->body);
             return "";
         }
 
@@ -203,7 +204,7 @@ namespace ai_chat_sdk{
         // 7.创建请求对象
         httplib::Request req;
         req.method = "POST";
-        req.path = "/v1/chat/completions";
+        req.path = "/chat/completions";
         req.headers = headers;
         req.body = requestBodyStr;
         // 8.设置响应处理器

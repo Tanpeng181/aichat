@@ -6,6 +6,7 @@ build_check/
 **/.env
 /ChatServer/required/
 /ChatServer/build/www/
+/ChatServer/build/ChatServer
 
 # 忽略 CMake 生成的文件
 CMakeCache.txt
@@ -20,3 +21,5 @@ Makefile
 *.log
 *.tmp
 .env
+*.db
+*.a
