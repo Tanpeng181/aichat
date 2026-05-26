@@ -23,3 +23,5 @@ Makefile
 .env
 *.db
 *.a
+*.js
+*.py

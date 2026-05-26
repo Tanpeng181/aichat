@@ -524,6 +524,7 @@ void ChatServer::handleSendMessageStreamRequest(const httplib::Request& request,
     response.status = 200; // 成功
     response.set_header("Cache-Control", "no-cache");              // 不使用缓存，服务器立即将数据发送到网络
     response.set_header("Connection", "keep-alive");               // 保持连接，服务器不会关闭连接
+    response.set_header("X-Accel-Buffering", "no");                // 禁用 Nginx 等反向代理的缓冲，确保流实时传输
     response.set_header("Access-Control-Allow-Origin", "*");        // 允许跨域请求
     response.set_header("Access-Control-Allow-Headers", "*");      // 允许所有请求头
     
