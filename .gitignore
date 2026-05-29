@@ -5,7 +5,7 @@ build_check/
 .vscode
 **/.env
 /ChatServer/required/
-/ChatServer/build/www/
+/test_stream.js
 /ChatServer/build/ChatServer
 
 # 忽略 CMake 生成的文件
@@ -23,5 +23,5 @@ Makefile
 .env
 *.db
 *.a
-*.js
+
 *.py

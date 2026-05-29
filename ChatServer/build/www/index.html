@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>AI聊天助手</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"><span>AI</span></div>
+          <div class="brand-copy">
+            <div class="brand-title">AI聊天助手</div>
+            <div class="brand-subtitle">流式对话 · Markdown · 代码高亮</div>
+          </div>
+        </div>
+        <button id="newChatTopBtn" class="new-chat-btn primary-btn" type="button">新建对话</button>
+      </div>
+
+      <div class="sidebar-meta">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>106.54.194.84</span>
+      </div>
+
+      <div class="sidebar-section-title">历史会话</div>
+      <div id="sessionList" class="session-list" aria-live="polite"></div>
+    </aside>
+
+    <main class="main-panel">
+      <section id="welcomeView" class="welcome-view">
+        <div class="hero-card">
+          <div class="hero-mark" aria-hidden="true"><span>AI</span></div>
+          <p class="hero-eyebrow">AIChat</p>
+          <h1>选择一个历史对话继续，或创建新的对话，开启您的AI之旅</h1>
+          <button id="newChatCenterBtn" class="primary-btn hero-button" type="button">新建对话</button>
+        </div>
+      </section>
+
+      <section id="chatView" class="chat-view hidden" aria-label="聊天区域">
+        <header class="chat-header">
+          <div class="chat-heading">
+            <div id="chatTitle" class="chat-title">新对话</div>
+            <div id="chatSubtitle" class="chat-subtitle">等待选择模型并开始消息交互</div>
+          </div>
+          <div id="chatModelBadge" class="chat-model-badge">未选择</div>
+        </header>
+
+        <div id="messageList" class="message-list" aria-live="polite"></div>
+
+        <form id="composerForm" class="composer" autocomplete="off">
+          <div class="composer-card">
+            <textarea id="messageInput" maxlength="2000" rows="1" placeholder="请输入您的消息...(Enter发送，Shift+Enter换行)"></textarea>
+            <div class="composer-row">
+              <div id="charCount" class="char-count">0/2000</div>
+              <button id="sendButton" class="send-btn" type="submit">发送</button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div id="modelModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modelModalTitle">
+      <div class="modal-header">
+        <div>
+          <p class="modal-kicker">新建对话</p>
+          <h2 id="modelModalTitle">请选择本次会话模型</h2>
+        </div>
+        <button id="closeModalBtn" class="icon-btn" type="button" aria-label="关闭">×</button>
+      </div>
+      <p class="modal-desc">每次仅能选择一个模型，确认后将立即创建会话。</p>
+      <div id="modelGrid" class="model-grid"></div>
+      <div class="modal-footer">
+        <button id="cancelModelBtn" class="secondary-btn" type="button">取消</button>
+        <button id="confirmModelBtn" class="primary-btn" type="button">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastArea" class="toast-area" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
