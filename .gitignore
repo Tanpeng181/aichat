@@ -5,6 +5,7 @@ build_check/
 .vscode
 **/.env
 /ChatServer/required/
+/ChatServer/build/ChatServer.conf
 /test_stream.js
 /ChatServer/build/ChatServer
 
